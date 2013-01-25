@@ -1,6 +1,8 @@
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Graphical user interface to a Tic Tac Toe application.
@@ -28,6 +30,8 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	private String myName;
 	/** The mark used by this player ('X' or 'O') */
 	private char myMark;
+
+    private Connection connection;
 
 	/**
 	 * Creates a new GUI.
@@ -95,6 +99,17 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		setVisible(true);
 	}
+
+    private final List show_board() {
+        List list = new ArrayList();
+        for( int x = 0; x < BOARD_SIZE; ++x ) {
+            for( int y = 0; y < BOARD_SIZE; ++y ) {
+                if( board[ x ][ y ].marked() )
+                    list.add( new Pair( x, y ) );
+            }
+        }
+        return list;
+    }
 
 	/**
 	 * Called by the Square class when an empty square is clicked.
