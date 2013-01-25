@@ -117,9 +117,18 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	 * @param column	The column of the square that was clicked.
 	 */
 	public void squareClicked(int row, int column) {
-		// This method must be modified!
-		setMark(row, column, myMark);
-	}
+        setMark(row, column, myMark);
+        try {
+            this.connection.mark( new ArrayList() ); // TEMP FOR COMPILER ERROR
+        }
+        catch (java.rmi.RemoteException e ) {
+            /* print error */
+            e.printStackTrace();
+        }
+        catch (IntegrityException e) {
+            System.err.println( "Error: Integrity verification failed. Aborting." );
+        }
+    }
 
 	/**
 	 * Marks the specified square of the board with the specified mark.
@@ -142,6 +151,11 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 		else if(e.getSource() == quitItem)
 			quit();
 	}
+    public void setMark( final int row, final int column ) throws IntegrityException {
+        if( this.board[ row ][ column ].marked() ) throw new IntegrityException();
+        this.board[row][column].setMark(this.myMark);
+        this.repaint();
+    }
 
 	/**
 	 * Starts a new game, if the user confirms it in a dialog box.
@@ -152,6 +166,12 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 			clearBoard();
 		}
 	}
+    /* Force sets a mark. Should only be called by the client during integrity
+     * updates
+     */
+    public void forceMark( final int row, final int col ) {
+        this.board[ row ][ col ].setMark( this.myMark );
+    }
 
 	/**
 	 * Removes all marks from the board.
@@ -181,6 +201,15 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	public void println(String s) {
 		display.append(s + "\n");
 	}
+    /**
+     * Removes all marks from the board.
+     */
+    public void clearBoard() {
+        for(int row = 0; row < board.length; row++)
+            for(int col = 0; col < board[row].length; col++)
+                board[row][col].setMark(' ');
+        repaint();
+    }
 
 	/**
 	 * Outputs a message to the user.
