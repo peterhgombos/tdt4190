@@ -1,7 +1,9 @@
+import java.rmi.*;
+import java.util.List;
+
 public interface Connection extends Remote {
     /* Sends mark to this or client depending on role */
-    public void mark( final List state );
+    public void mark( final List state ) throws RemoteException, IntegrityException;
 
-    private boolean send_state( final List state ) throws RemoteException;
-    private void receive_state( final List state ) throws RemoteException; 
+    public boolean receive_state( final List state ) throws RemoteException, IntegrityException;
 }
