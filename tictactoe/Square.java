@@ -80,6 +80,10 @@ public class Square extends JPanel implements Constants, MouseListener
         return this.currentMark != ' ';
     }
 
+    final boolean marked( char mark ) {
+        return this.currentMark == mark;
+    }
+
 	// MouseListener methods that are not used:
 	public void mouseEntered(MouseEvent e) {}
 	public void mouseExited(MouseEvent e) {}

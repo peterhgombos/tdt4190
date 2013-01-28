@@ -130,16 +130,31 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         }
     }
 
-	/**
-	 * Marks the specified square of the board with the specified mark.
-	 * @param row		The row of the square to mark.
-	 * @param column	The column of the square to mark.
-	 * @param mark		The mark to use.
-	 */
-	public void setMark(int row, int column, char mark) {
-		board[row][column].setMark(mark);
-		repaint();
-	}
+    /**
+     * Marks the specified square of the board with the specified mark.
+     * @param row		The row of the square to mark.
+     * @param column	The column of the square to mark.
+     * @param mark		The mark to use.
+     */
+    public void setMark(int row, int column, char mark) {
+        board[row][column].setMark(mark);
+        repaint();
+
+        if( this.check_win( row, column, mark ) {
+        /* handle for victory */
+        }
+    }
+
+    private final boolean check_win( final int row, final int col, char mark ) {
+        int rscore, cscore = 0;
+        for( int i = row; i > -1 && board[i][col].mark( mark ); --i, ++rscore );
+        for( int i = row + 1; i < BOARD_HEIGHT && board[i][col].mark( mark ); ++i, ++rscore );
+
+        for( int i = col; i > -1 && board[row][i].mark( mark ); --i, ++cscore );
+        for( int i = col + 1; i < BOARD_WIDTH && board[row][i].mark( mark ); ++i, ++cscore );
+
+        return rscore >= WINNER_LENGTH || cscore >= WINNER_LENGTH;
+    }
 
 	/**
 	 * Called when a menu item has been selected.
