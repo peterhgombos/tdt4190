@@ -13,7 +13,7 @@ import java.util.List;
 public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	/** Textfield showing what mark you use ('X' or 'O') */
 	private JTextField id;
-	/** TextArea giving feedback to the user */
+    /** TextArea giving feedback to the user */
 	private TextArea display;
 	/** The panel containing the board */
 	private JPanel boardPanel;
@@ -118,12 +118,12 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         return list;
     }
 
-	/**
-	 * Called by the Square class when an empty square is clicked.
-	 * @param row		The row of the square that was clicked.
-	 * @param column	The column of the square that was clicked.
-	 */
-	public void squareClicked(int row, int column) {
+    /**
+     * Called by the Square class when an empty square is clicked.
+     * @param row		The row of the square that was clicked.
+     * @param column	The column of the square that was clicked.
+     */
+    public void squareClicked(int row, int column) {
         setMark(row, column, myMark);
         try {
             this.connection.mark( new ArrayList() ); // TEMP FOR COMPILER ERROR
@@ -164,31 +164,12 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         return rscore >= WINNER_LENGTH || cscore >= WINNER_LENGTH;
     }
 
-	/**
-	 * Called when a menu item has been selected.
-	 * @param e	The ActionEvent that occured.
-	 */
-	public void actionPerformed(ActionEvent e) {
-		if(e.getSource() == newGameItem)
-			newGame();
-		else if(e.getSource() == quitItem)
-			quit();
-	}
     public void setMark( final int row, final int column ) throws IntegrityException {
         if( this.board[ row ][ column ].marked() ) throw new IntegrityException();
         this.board[row][column].setMark(this.myMark);
         this.repaint();
     }
 
-	/**
-	 * Starts a new game, if the user confirms it in a dialog box.
-	 */
-	public void newGame() {
-		// This method must be modified!
-		if(JOptionPane.showConfirmDialog(this, "Are you sure you want to start a new game?", "Start over?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-			clearBoard();
-		}
-	}
     /* Force sets a mark. Should only be called by the client during integrity
      * updates
      */
@@ -196,34 +177,55 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         this.board[ row ][ col ].setMark( this.myMark );
     }
 
-	/**
-	 * Removes all marks from the board.
-	 */
-	public void clearBoard() {
-		for(int row = 0; row < board.length; row++)
-			for(int col = 0; col < board[row].length; col++)
-				board[row][col].setMark(' ');
-		repaint();
-	}
+    /**
+     * Called when a menu item has been selected.
+     * @param e	The ActionEvent that occured.
+     */
+    public void actionPerformed(ActionEvent e) {
+        if(e.getSource() == newGameItem)
+            newGame();
+        else if(e.getSource() == quitItem)
+            quit();
+    }
 
-	/**
-	 * Exits the game, if the user confirms it in a dialog box.
-	 * Should notify the opponent that we left the game.
-	 */
-	public void quit() {
-		// This method should be modified!
-		if(JOptionPane.showConfirmDialog(this, "Are you sure you want to quit?", "Really quit?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
-			System.exit(0);
-		}
-	}
+    /**
+     * Starts a new game, if the user confirms it in a dialog box.
+     */
+    public void newGame() {
+        // This method must be modified!
+        if(JOptionPane.showConfirmDialog(this, "Are you sure you want to start a new game?", "Start over?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            clearBoard();
+        }
+    }
 
-	/**
-	 * Outputs a message to the user.
-	 * @param s	The string to display. Adds a newline to the end of the string.
-	 */
-	public void println(String s) {
-		display.append(s + "\n");
-	}
+    /**
+     * Removes all marks from the board.
+     */
+    public void clearBoard() {
+        for(int row = 0; row < board.length; row++)
+            for(int col = 0; col < board[row].length; col++)
+                board[row][col].setMark(' ');
+        repaint();
+    }
+
+    /**
+     * Exits the game, if the user confirms it in a dialog box.
+     * Should notify the opponent that we left the game.
+     */
+    public void quit() {
+        // This method should be modified!
+        if(JOptionPane.showConfirmDialog(this, "Are you sure you want to quit?", "Really quit?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
+            System.exit(0);
+        }
+    }
+
+    /**
+     * Outputs a message to the user.
+     * @param s	The string to display. Adds a newline to the end of the string.
+     */
+    public void println(String s) {
+        display.append(s + "\n");
+    }
 
     /**
      * Outputs a message to the user.

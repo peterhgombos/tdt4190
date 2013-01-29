@@ -28,6 +28,8 @@ public class Server extends UnicastRemoteObject implements Connection {
         /* integrity check */
         if( state.size() != 1 ) throw new IntegrityException();
         Pair< Integer, Integer > coord = (Pair)state.get( 0 );
+
+        //if( this.gui.legit( coord.x, coord.y ) ) throw new IntegrityException();
         this.gui.setMark( coord.x, coord.y );
 
         return true;
