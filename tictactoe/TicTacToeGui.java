@@ -38,9 +38,9 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	 * @param name	The name of that player.
 	 * @param mark	The mark used by that player.
 	 */
-	public TicTacToeGui(String name, char mark) {
+	public TicTacToeGui(String name, final String address, final boolean server ) {
 		myName = name;
-		myMark = mark;
+		myMark = server ? 'X' : 'O';
 
 		// Create GUI components:
 		// The display at the bottom:
@@ -92,13 +92,20 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 			}
 		});
 
-		// Place and show the window:
-		setTitle("Tic Tac Toe: " + name);
-		setSize(WIN_WIDTH, WIN_HEIGHT);
-		setLocation(200, 200);
-		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
-		setVisible(true);
-	}
+        try {
+            this.connection = server ? new Server( address, this ) : new Client( address, this );
+        }
+        catch( Exception e ) {
+            e.printStackTrace();
+        }
+
+        // Place and show the window:
+        setTitle("Tic Tac Toe: " + name);
+        setSize(WIN_WIDTH, WIN_HEIGHT);
+        setLocation(200, 200);
+        setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+        setVisible(true);
+    }
 
     private final List show_board() {
         List list = new ArrayList();
@@ -140,18 +147,19 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         board[row][column].setMark(mark);
         repaint();
 
-        if( this.check_win( row, column, mark ) {
-        /* handle for victory */
+        if( this.check_win( row, column, mark ) ) {
+            /* handle for victory */
         }
     }
 
     private final boolean check_win( final int row, final int col, char mark ) {
-        int rscore, cscore = 0;
-        for( int i = row; i > -1 && board[i][col].mark( mark ); --i, ++rscore );
-        for( int i = row + 1; i < BOARD_HEIGHT && board[i][col].mark( mark ); ++i, ++rscore );
+        int rscore = 0;
+        int cscore = 0;
+        for( int i = row; i > -1 && board[i][col].marked( mark ); --i, ++rscore );
+        for( int i = row + 1; i < BOARD_SIZE && board[i][col].marked( mark ); ++i, ++rscore );
 
-        for( int i = col; i > -1 && board[row][i].mark( mark ); --i, ++cscore );
-        for( int i = col + 1; i < BOARD_WIDTH && board[row][i].mark( mark ); ++i, ++cscore );
+        for( int i = col; i > -1 && board[row][i].marked( mark ); --i, ++cscore );
+        for( int i = col + 1; i < BOARD_SIZE && board[row][i].marked( mark ); ++i, ++cscore );
 
         return rscore >= WINNER_LENGTH || cscore >= WINNER_LENGTH;
     }
@@ -234,11 +242,40 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 		display.append(s);
 	}
 
-	/**
-	 * Starts up a GUI without an associated player, in order
-	 * to check the appearance of the GUI.
-	 */
-	public static void main(String args[]) {
-		TicTacToeGui hisGui = new TicTacToeGui("Ottar", 'X');
-	}
+    /**
+     * Outputs a message to the user.
+     * @param s	The string to display. Adds a newline to the end of the string.
+     */
+    public void println(String s) {
+        display.append(s + "\n");
+    }
+
+    /**
+     * Outputs a message to the user.
+     * @param s	The string to display.
+     */
+    public void print(String s) {
+        display.append(s);
+    }
+
+    /**
+     * Starts up a GUI without an associated player, in order
+     * to check the appearance of the GUI.
+     */
+    public static void main(String args[]) {
+        boolean server = true;
+        System.out.println( args[ 0 ] );
+        if( args[0].equals( "server" ) ) {
+            server = true;
+        }
+        else if( args[0].equals( "client" ) ) {
+            server = false;
+        }
+        else {
+            System.err.println( "Usage: ttt [server|client] 'address:port'" );
+            System.exit( 1 );
+        }
+
+        TicTacToeGui hisGui = new TicTacToeGui("Ottar", args[1], server );
+    }
 }
