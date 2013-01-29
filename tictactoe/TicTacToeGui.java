@@ -224,31 +224,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	public void println(String s) {
 		display.append(s + "\n");
 	}
-    /**
-     * Removes all marks from the board.
-     */
-    public void clearBoard() {
-        for(int row = 0; row < board.length; row++)
-            for(int col = 0; col < board[row].length; col++)
-                board[row][col].setMark(' ');
-        repaint();
-    }
-
-	/**
-	 * Outputs a message to the user.
-	 * @param s	The string to display.
-	 */
-	public void print(String s) {
-		display.append(s);
-	}
-
-    /**
-     * Outputs a message to the user.
-     * @param s	The string to display. Adds a newline to the end of the string.
-     */
-    public void println(String s) {
-        display.append(s + "\n");
-    }
 
     /**
      * Outputs a message to the user.
