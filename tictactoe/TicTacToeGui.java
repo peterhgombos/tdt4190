@@ -120,15 +120,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setVisible(true);
 
-    private final List show_board() {
-        List list = new ArrayList();
-        for( int x = 0; x < BOARD_SIZE; ++x ) {
-            for( int y = 0; y < BOARD_SIZE; ++y ) {
-                if( board[ x ][ y ].marked() )
-                    list.add( new Pair( x, y ) );
-            }
-        }
-        return list;
     }
 
     /**
@@ -137,16 +128,12 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      * @param column	The column of the square that was clicked.
      */
     public void squareClicked(int row, int column) {
-        setMark(row, column, myMark);
+        this.setMark(row, column, myMark);
         try {
-            this.connection.mark( new ArrayList() ); // TEMP FOR COMPILER ERROR
+            this.connection.mark( new Pair( row, column ) );
         }
-        catch (java.rmi.RemoteException e ) {
-            /* print error */
+        catch( Exception e ) {
             e.printStackTrace();
-        }
-        catch (IntegrityException e) {
-            System.err.println( "Error: Integrity verification failed. Aborting." );
         }
     }
 
@@ -177,8 +164,7 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         return rscore >= WINNER_LENGTH || cscore >= WINNER_LENGTH;
     }
 
-    public void setMark( final int row, final int column ) throws IntegrityException {
-        if( this.board[ row ][ column ].marked() ) throw new IntegrityException();
+    public void setMark( final int row, final int column ) {
         this.board[row][column].setMark(this.myMark);
         this.repaint();
     }
