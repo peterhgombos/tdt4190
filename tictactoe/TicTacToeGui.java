@@ -32,15 +32,16 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 	private char myMark;
 
     private Connection connection;
+    private Server server;
 
 	/**
 	 * Creates a new GUI.
 	 * @param name	The name of that player.
 	 * @param mark	The mark used by that player.
 	 */
-	public TicTacToeGui(String name, final String address, final boolean server ) {
+	public TicTacToeGui(String name, final String address ) {
 		myName = name;
-		myMark = server ? 'X' : 'O';
+		this.myMark = 'X';
 
 		// Create GUI components:
 		// The display at the bottom:
@@ -49,7 +50,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 		// The name field at the top:
 		id = new JTextField();
 		id.setEditable(false);
-		id.setText(myName + ": You are player " + myMark);
 		// The board:
 		JPanel gridPanel = new JPanel();
 		gridPanel.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE, 0, 0));
@@ -93,19 +93,32 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 		});
 
         try {
-            this.connection = server ? new Server( address, this ) : new Client( address, this );
+            this.server = new Server( this );
         }
         catch( Exception e ) {
             e.printStackTrace();
+            System.exit( 1 );
         }
 
+        if( !address.equals("") ) {
+            try {
+                this.myMark = 'O';
+                this.connection = new Client( address );
+                this.connection.register( address );
+            }
+            catch( Exception e ) {
+                e.printStackTrace();
+                System.exit( 1 );
+            }
+        }
+
+		id.setText(myName + ": You are player " + myMark);
         // Place and show the window:
         setTitle("Tic Tac Toe: " + name);
         setSize(WIN_WIDTH, WIN_HEIGHT);
         setLocation(200, 200);
         setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         setVisible(true);
-    }
 
     private final List show_board() {
         List list = new ArrayList();
@@ -235,24 +248,31 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         display.append(s);
     }
 
+    public boolean prompt_connection( final String address ) {
+        boolean accepted = JOptionPane.showConfirmDialog(this, "Incoming connection from " + address + ". Allow it?", "Allow connection?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+
+        if( accepted ) {
+            try {
+                this.connection = new Client( address );
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                System.exit( 1 );
+            }
+        }
+
+        return accepted;
+    }
+
+    public boolean prompt_newgame() {
+        return JOptionPane.showConfirmDialog(this, "Peer suggests a new game.", "Accept and start a new game?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    }
+
     /**
      * Starts up a GUI without an associated player, in order
      * to check the appearance of the GUI.
      */
     public static void main(String args[]) {
-        boolean server = true;
-        System.out.println( args[ 0 ] );
-        if( args[0].equals( "server" ) ) {
-            server = true;
-        }
-        else if( args[0].equals( "client" ) ) {
-            server = false;
-        }
-        else {
-            System.err.println( "Usage: ttt [server|client] 'address:port'" );
-            System.exit( 1 );
-        }
-
-        TicTacToeGui hisGui = new TicTacToeGui("Ottar", args[1], server );
+        TicTacToeGui hisGui = new TicTacToeGui("Ottar", args.length > 0 ? args[0] : "" );
     }
 }
