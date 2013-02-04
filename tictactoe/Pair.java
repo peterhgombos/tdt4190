@@ -1,4 +1,4 @@
-public class Pair< T, U> {
+public class Pair< T, U > implements java.io.Serializable {
     public final T x;
     public final U y;
 
