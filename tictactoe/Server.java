@@ -7,11 +7,10 @@ public class Server extends UnicastRemoteObject implements Connection {
 
     private TicTacToeGui gui;
 
-    public Server( TicTacToeGui gui )
+    public Server( TicTacToeGui gui, final String address  )
         throws ConnectException, NotBoundException, java.net.MalformedURLException, RemoteException {
         this.gui = gui;
 
-        final String address = "localhost";
         System.setSecurityManager( new LiberalSecurityManager() );
         Naming.rebind( "rmi://" + address + "/ttt", this );
         System.out.println( "Registry set up at " + address );

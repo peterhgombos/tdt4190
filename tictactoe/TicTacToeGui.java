@@ -11,89 +11,97 @@ import java.util.List;
  * have got five marks in a row.
  */
 public class TicTacToeGui extends JFrame implements Constants, ActionListener {
-	/** Textfield showing what mark you use ('X' or 'O') */
-	private JTextField id;
+    /** Textfield showing what mark you use ('X' or 'O') */
+    private JTextField id;
     /** TextArea giving feedback to the user */
-	private TextArea display;
-	/** The panel containing the board */
-	private JPanel boardPanel;
-	/** The squares of the board */
-	private Square board[][];
-	/** The menu bar */
-	private JMenuBar menuBar;
-	/** The game submenu */
-	private JMenu gameMenu;
-	/** Game submenu choices */
-	private JMenuItem newGameItem, quitItem;
-	
-	/** The name of the player using this GUI */
-	private String myName;
-	/** The mark used by this player ('X' or 'O') */
-	private char myMark;
+    private TextArea display;
+    /** The panel containing the board */
+    private JPanel boardPanel;
+    /** The squares of the board */
+    private Square board[][];
+    /** The menu bar */
+    private JMenuBar menuBar;
+    /** The game submenu */
+    private JMenu gameMenu;
+    /** Game submenu choices */
+    private JMenuItem newGameItem, quitItem, connectItem;
+
+    /** The name of the player using this GUI */
+    private String myName;
+    /** The mark used by this player ('X' or 'O') */
+    private char myMark;
 
     private Connection connection;
     private Server server;
 
-	/**
-	 * Creates a new GUI.
-	 * @param name	The name of that player.
-	 * @param mark	The mark used by that player.
-	 */
-	public TicTacToeGui(String name, final String address ) {
-		myName = name;
-		this.myMark = 'X';
+    /**
+     * Creates a new GUI.
+     * @param name	The name of that player.
+     * @param mark	The mark used by that player.
+     */
+    public TicTacToeGui(String name, final String Serv, final String address ) {
+        myName = name;
+        this.myMark = 'X';
 
-		// Create GUI components:
-		// The display at the bottom:
-		display = new TextArea("", 4, 30, TextArea.SCROLLBARS_VERTICAL_ONLY);
-		display.setEditable(false);
-		// The name field at the top:
-		id = new JTextField();
-		id.setEditable(false);
-		// The board:
-		JPanel gridPanel = new JPanel();
-		gridPanel.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE, 0, 0));
-		board = new Square[BOARD_SIZE][BOARD_SIZE];
-		for(int row = 0; row < board.length; row++) 
-			for(int col = 0; col < board[row].length; col++) {
-				board[row][col] = new Square(this, row, col);
-				gridPanel.add(board[row][col]);
-			}
-		boardPanel = new JPanel();
-		boardPanel.add(gridPanel);
+        // Create GUI components:
+        // The display at the bottom:
+        display = new TextArea("", 4, 30, TextArea.SCROLLBARS_VERTICAL_ONLY);
+        display.setEditable(false);
+        // The name field at the top:
+        id = new JTextField();
+        id.setEditable(false);
+        // The board:
+        JPanel gridPanel = new JPanel();
+        gridPanel.setLayout(new GridLayout(BOARD_SIZE, BOARD_SIZE, 0, 0));
+        board = new Square[BOARD_SIZE][BOARD_SIZE];
+        for(int row = 0; row < board.length; row++) 
+            for(int col = 0; col < board[row].length; col++) {
+                board[row][col] = new Square(this, row, col);
+                gridPanel.add(board[row][col]);
+            }
+        boardPanel = new JPanel();
+        boardPanel.add(gridPanel);
 
-		// Place the components:
-		Container cp = getContentPane();
-		cp.setLayout(new BorderLayout());
-		cp.add("South", display);
-		cp.add("North", id);
-		cp.add("Center", boardPanel);
+        // Place the components:
+        Container cp = getContentPane();
+        cp.setLayout(new BorderLayout());
+        cp.add("South", display);
+        cp.add("North", id);
+        cp.add("Center", boardPanel);
 
-		// Create the menu.
-		menuBar = new JMenuBar();
-		setJMenuBar(menuBar);
-		gameMenu = new JMenu("Game");
-		gameMenu.setMnemonic(KeyEvent.VK_G);
-		menuBar.add(gameMenu);
-		newGameItem = new JMenuItem("New game", KeyEvent.VK_N);
-		newGameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
-		gameMenu.add(newGameItem);
-		quitItem = new JMenuItem("Quit", KeyEvent.VK_Q);
-		quitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
-		gameMenu.add(quitItem);
+        // Create the menu.
+        menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
+        gameMenu = new JMenu("Game");
+        gameMenu.setMnemonic(KeyEvent.VK_G);
+        menuBar.add(gameMenu);
 
-		// Add listeners
-		newGameItem.addActionListener(this);
-		quitItem.addActionListener(this);
-		// Add an anonymous WindowListener which calls quit() when the window is closing
-		addWindowListener(new WindowAdapter() {
-			public void windowClosing(WindowEvent e) {
-				quit();
-			}
-		});
+        newGameItem = new JMenuItem("New game", KeyEvent.VK_N);
+        newGameItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0));
+        gameMenu.add(newGameItem);
+
+        quitItem = new JMenuItem("Quit", KeyEvent.VK_Q);
+        quitItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
+        gameMenu.add(quitItem);
+
+        this.connectItem = new JMenuItem("Connect", KeyEvent.VK_C);
+        this.connectItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0));
+        gameMenu.add(connectItem);
+
+        // Add listeners
+        newGameItem.addActionListener(this);
+        quitItem.addActionListener(this);
+        this.connectItem.addActionListener( this );
+
+        // Add an anonymous WindowListener which calls quit() when the window is closing
+        addWindowListener(new WindowAdapter() {
+            public void windowClosing(WindowEvent e) {
+                quit();
+            }
+        });
 
         try {
-            this.server = new Server( this );
+            this.server = new Server( this, Serv );
         }
         catch( Exception e ) {
             e.printStackTrace();
@@ -112,7 +120,7 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
             }
         }
 
-		id.setText(myName + ": You are player " + myMark);
+        id.setText(myName + ": You are player " + myMark);
         // Place and show the window:
         setTitle("Tic Tac Toe: " + name);
         setSize(WIN_WIDTH, WIN_HEIGHT);
@@ -295,6 +303,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      * to check the appearance of the GUI.
      */
     public static void main(String args[]) {
-        TicTacToeGui hisGui = new TicTacToeGui("Ottar", args.length > 0 ? args[0] : "" );
+        TicTacToeGui hisGui = new TicTacToeGui("Ottar", args[0], args.length > 1 ? args[1] : "" );
     }
 }
