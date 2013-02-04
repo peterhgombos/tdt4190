@@ -185,6 +185,27 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
             newGame();
         else if(e.getSource() == quitItem)
             quit();
+        else if( e.getSource() == connectItem ) {
+            connection_setup();
+        }
+    }
+
+    public void connection_setup() {
+        String address = JOptionPane.showInputDialog( "Please enter an IP address or hostname and optional port number." );
+
+        if ((address != null) && (address.length() > 0)) {
+            try {
+                this.connection = new Client( address );
+                this.myMark = 'O';
+                this.id.setText(myName + ": You are player " + myMark);
+                this.connection.register( address );
+                return;
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+                System.exit( 1 );
+            }
+        }
     }
 
     /**
@@ -249,6 +270,8 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         if( accepted ) {
             try {
                 this.connection = new Client( address );
+                this.myMark = 'X';
+                this.id.setText(myName + ": You are player " + this.myMark);
             }
             catch (Exception e) {
                 e.printStackTrace();
