@@ -213,18 +213,22 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      */
     public void newGame() {
         // This method must be modified!
+        if( JOptionPane.showConfirmDialog(this,
+                    "Are you sure you want to start a new game?", "Start over?",
+                    JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION )
+            return;
+
         try {
-            if(JOptionPane.showConfirmDialog(this,
-                        "Are you sure you want to start a new game?", "Start over?",
-                        JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION &&
-                    this.connection.new_game() ) {
-                clearBoard();
-                    }
+
+            if( !this.connection.new_game() )
+                return;
         }
         catch( Exception e ) {
             e.printStackTrace();
             System.exit( 1 );
         }
+
+        clearBoard();
     }
 
     /**
