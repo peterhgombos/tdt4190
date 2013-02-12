@@ -3,6 +3,7 @@ import java.awt.event.*;
 import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.rmi.*;
 
 /**
  * Graphical user interface to a Tic Tac Toe application.
@@ -34,7 +35,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
     private boolean myTurn = false;
 
     private Connection connection;
-    private Server server;
 
     /**
      * Creates a new GUI.
@@ -102,24 +102,12 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
             }
         });
 
-        try {
-            this.server = new Server( this, Serv );
+        try{
+            this.connection = new Conn( address, this );
         }
-        catch( Exception e ) {
+        catch( Exception e ) { 
             e.printStackTrace();
-            System.exit( 1 );
-        }
-
-        if( !address.equals("") ) {
-            try {
-                this.myMark = 'O';
-                this.connection = new Client( address );
-                this.connection.register( address );
-            }
-            catch( Exception e ) {
-                e.printStackTrace();
-                System.exit( 1 );
-            }
+            exit( 1 );
         }
 
         id.setText(myName + ": You are player " + myMark);
@@ -141,13 +129,13 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         if( !this.myTurn ) return;
 
         try {
-            this.connection.mark( new Pair( row, column ) );
+            this.connection.mark( new Pair( row, column ), this.myMark );
+            this.myTurn = false;
         }
         catch( Exception e ) {
             e.printStackTrace();
         }
         this.setMark(row, column, myMark);
-        this.myTurn = false;
     }
 
     /**
@@ -157,7 +145,9 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      * @param mark		The mark to use.
      */
     public void setMark(int row, int column, char mark) {
-        board[row][column].setMark(mark);
+        this.board[row][column].setMark(mark);
+        this.myTurn = true;
+        this.repaint();
         repaint();
 
         if( this.check_win( row, column, mark ) ) {
@@ -175,19 +165,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         for( int i = col + 1; i < BOARD_SIZE && board[row][i].marked( mark ); ++i, ++cscore );
 
         return rscore >= WINNER_LENGTH || cscore >= WINNER_LENGTH;
-    }
-
-    public void setMark( final int row, final int column ) {
-        this.board[row][column].setMark(this.myMark);
-        this.myTurn = true;
-        this.repaint();
-    }
-
-    /* Force sets a mark. Should only be called by the client during integrity
-     * updates
-     */
-    public void forceMark( final int row, final int col ) {
-        this.board[ row ][ col ].setMark( this.myMark );
     }
 
     /**
@@ -209,10 +186,8 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 
         if ((address != null) && (address.length() > 0)) {
             try {
-                this.connection = new Client( address );
-                this.myMark = 'O';
-                this.id.setText(myName + ": You are player " + myMark);
-                this.connection.register( address );
+                this.connection = (Connection)Naming.lookup( "rmi://" + address + "/ttt" );
+                System.out.println( "Connection set up with " + address );
                 return;
             }
             catch (Exception e) {
@@ -226,14 +201,14 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      * Starts a new game, if the user confirms it in a dialog box.
      */
     public void newGame() {
-        // This method must be modified!
+        if( this.connection == null ) return;
+
         if( JOptionPane.showConfirmDialog(this,
                     "Are you sure you want to start a new game?", "Start over?",
                     JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION )
             return;
 
         try {
-
             if( !this.connection.new_game() )
                 return;
         }
@@ -242,6 +217,9 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
             System.exit( 1 );
         }
 
+        this.myMark = 'O';
+        this.id.setText(myName + ": You are player " + myMark);
+        this.myTurn = false;
         clearBoard();
     }
 
@@ -282,27 +260,15 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         display.append(s);
     }
 
-    public boolean prompt_connection( final String address ) {
-        boolean accepted = JOptionPane.showConfirmDialog(this, "Incoming connection from " + address + ". Allow it?", "Allow connection?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
-
-        if( accepted ) {
-            try {
-                this.connection = new Client( address );
-                this.myMark = 'X';
-                this.id.setText(myName + ": You are player " + this.myMark);
-                this.myTurn = true;
-            }
-            catch (Exception e) {
-                e.printStackTrace();
-                System.exit( 1 );
-            }
-        }
-
-        return accepted;
-    }
-
     public boolean prompt_newgame() {
-        return JOptionPane.showConfirmDialog(this, "Peer suggests a new game.", "Accept and start a new game?", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+        if( JOptionPane.showConfirmDialog(this,
+            "Peer suggests a new game.", "Accept and start a new game?",
+            JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION ) return false;
+
+        this.myTurn = true;
+        this.myMark = 'X';
+        this.clearBoard();
+        return true;
     }
 
     /**
