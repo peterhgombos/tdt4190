@@ -31,6 +31,8 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
     /** The mark used by this player ('X' or 'O') */
     private char myMark;
 
+    private boolean myTurn = false;
+
     private Connection connection;
     private Server server;
 
@@ -136,13 +138,16 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      * @param column	The column of the square that was clicked.
      */
     public void squareClicked(int row, int column) {
-        this.setMark(row, column, myMark);
+        if( !this.myTurn ) return;
+
         try {
             this.connection.mark( new Pair( row, column ) );
         }
         catch( Exception e ) {
             e.printStackTrace();
         }
+        this.setMark(row, column, myMark);
+        this.myTurn = false;
     }
 
     /**
@@ -174,6 +179,7 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 
     public void setMark( final int row, final int column ) {
         this.board[row][column].setMark(this.myMark);
+        this.myTurn = true;
         this.repaint();
     }
 
@@ -284,6 +290,7 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
                 this.connection = new Client( address );
                 this.myMark = 'X';
                 this.id.setText(myName + ": You are player " + this.myMark);
+                this.myTurn = true;
             }
             catch (Exception e) {
                 e.printStackTrace();
