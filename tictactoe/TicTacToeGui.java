@@ -147,6 +147,7 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
     public void setMark(int row, int column, char mark) {
         this.board[row][column].setMark(mark);
         this.repaint();
+        this.myTurn = true;
         repaint();
 
         if( this.check_win( row, column, mark ) ) {
