@@ -130,12 +130,12 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
 
         try {
             this.connection.mark( new Pair( row, column ), this.myMark );
-            this.myTurn = false;
         }
         catch( Exception e ) {
             e.printStackTrace();
         }
         this.setMark(row, column, myMark);
+        this.myTurn = false;
     }
 
     /**
@@ -146,7 +146,6 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
      */
     public void setMark(int row, int column, char mark) {
         this.board[row][column].setMark(mark);
-        this.myTurn = true;
         this.repaint();
         repaint();
 
