@@ -151,7 +151,9 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         repaint();
 
         if( this.check_win( row, column, mark ) ) {
-            /* handle for victory */
+            this.game_over( mark );
+            this.myTurn = false;
+            this.newGame();
         }
     }
 
@@ -269,6 +271,10 @@ public class TicTacToeGui extends JFrame implements Constants, ActionListener {
         this.myMark = 'X';
         this.clearBoard();
         return true;
+    }
+
+    public void game_over( final char winner ) {
+        this.print( "Game over! The winner is " + winner + "." );
     }
 
     /**
