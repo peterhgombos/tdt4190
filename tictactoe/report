@@ -1,0 +1,38 @@
+Tic Tac Toe solution strategy & experiences
+by Jørgen Kvalsvik, Peter Gombos and Sindre Nygaard.
+
+---
+
+Initially we imagined a solution with a clear distinction between a Server
+class and a Client class with a common interface that allowed all management
+and netcode to be invisible from the game itself. This turned out to be overly
+complex for this assignment and offer a set of problems on its own as the
+connection-handshake-setup phase got convoluted and ended up contacting its own
+server object rather than the remote one.
+
+Two noteworthy experiences from the attempt:
+#1 Be -very- clear on what address to connect to and make sure it is distinct
+depending on server/client role
+#2 Use different interfaces for the server and the client. This would
+automatically solve the confusion, and only one of the would have to be
+"public" to the programmer of the game logic.
+
+---
+
+What we instead ended up doing was having one Connection class (called Conn).
+Inheriting Remote, the Conn class was a remote object that handled
+communication "one way"-style. The peer-to-peer architecture is then
+introduced by both clients looking up eachother, whereas we in addition
+added a state variable to keep track of who was allowed to move. This should
+ideally be handled automatically with access control and prompting, but as it
+does not demonstrate the use of RMI we left it out.
+
+The squareClicked method checks the "my turn"-state and does nothing if it is 
+false. If it is allowed to click, however, it notifies its peer with the
+coordinates and waits for a reply. For an actual product it would instantly
+draw as this now feels very sluggish on a poor connection. However this
+guarantees integrity between the two peers as it only marks the square if the
+connection does -not- throw an exception.
+
+New game and game over are both handled in a similar fashion; sending a message
+through the remote connection object that triggers and handles a dialogue.
