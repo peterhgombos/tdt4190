@@ -1,0 +1,4 @@
+#1: Implement win messages + handling
+#2: Implement automatic peer connection
+#3: Implement peer disconnect on quit
+#4: Implement messages such as "Your turn"
