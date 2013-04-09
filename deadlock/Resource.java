@@ -45,25 +45,18 @@ public class Resource
 		}
 	}
 
-	/**
-	 * Releases the lock of this resource.
-	 * @param transactionId		The ID of the transaction that wants to release lock.
-	 *							If this transaction doesn't currently own the lock an
-	 *							error message is displayed.
-	 * @return					Whether or not the lock could be released.
-	 */
-	public synchronized boolean unlock(int transactionId) {
-		if(lockOwner == null || lockOwner.intValue() != transactionId) {
-			System.err.println("Error: Transaction "+transactionId+" tried to unlock a resource without owning the lock!");
-			return false;
-		}
-		else {
-			lockOwner = null;
-			// Notify a waiting thread that it can acquire the lock
-			notify();
-			return true;
-		}
-	}
+        // Wait for the lock
+        try	{
+            wait( 3000 );
+            // java <3
+            // the worst hack I have ever seen to overcome the retardness the
+            // of the java standard library. as wait() is broken and doesn't
+            // actually differentiate the cases of timeout and notifying this
+            // has to be handled manually. java - write once, run away
+            if( lockOwner != null ) throw new InterruptedException();
+        } catch (InterruptedException ie) {
+            return false;
+        }
 
 	/**
 	 * Gets the current owner of this resource's lock.
