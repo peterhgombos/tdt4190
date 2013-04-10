@@ -42,7 +42,7 @@ public class Resource
             // of the java standard library. as wait() is broken and doesn't
             // actually differentiate the cases of timeout and notifying this
             // has to be handled manually. java - write once, run away
-            if( lockOwner != null ) throw new InterruptedException();
+            if( lockOwner != null ) return false;
         } catch (InterruptedException ie) {
             return false;
         }
