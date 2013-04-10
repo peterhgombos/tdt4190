@@ -34,6 +34,8 @@ public class ServerImpl extends UnicastRemoteObject implements Server
 	private String registryAddress;
 	/** A hash table of all known servers, hashed on their ID */
 	private Hashtable servers;
+    /** LOL YOU SHALL HAVE NO DOCUMENTATION HERE */
+    private List< Probe > probes;
 	/** A list of all the local resources on this server */
 	private ArrayList resources;
 	/** The number of transactions performed so far by this server */
@@ -69,6 +71,7 @@ public class ServerImpl extends UnicastRemoteObject implements Server
 		System.setSecurityManager(new LiberalSecurityManager());
 		registryAddress = ip;
 		servers = new Hashtable();
+        this.probes = new ArrayList< Probe >();
 		transactionCounter = nofAborts = 0;
 		activeTransaction = null;
 		readGlobalParameters(inputfile);
@@ -568,25 +571,50 @@ public class ServerImpl extends UnicastRemoteObject implements Server
 		System.exit(0);
 	}
 
-	/**
-	 * Starts up a new server.
-	 * @param args	Command line parameters, the first parameter specifies the address of the RMI registry,
-	 *				and the second specifies the name of the input file.
-	 *				If no parameters are supplied, the default address of "localhost:1111" is used, and
-	 *				transactions are performed randomly.
-	 */
-	public static void main(String[] args) {
-		String registryAddress = "localhost:1111";
-		String inputfile = null;
-		if(args.length > 0)
-			registryAddress = args[0];
-		if(args.length > 1)
-			inputfile = args[1];
-		try	{
-			new ServerImpl(registryAddress, inputfile);
-		}
-		catch (RemoteException re) {
-			re.printStackTrace();
-		}
-	}
+    public boolean probe( Integer owner ) {
+        Probe probe = new Probe();
+        this.probes.add( probe );
+
+        try {
+            Server server = this.getServer( this.getTransactionOwner( owner ) );
+            boolean lock = server.trace_lock( probe );
+            if( !lock ) { this.probes.remove( this.probes.indexOf( probe ) ); }
+
+            return true;
+        } catch( Exception e ) {
+            System.err.println( "I want to be the very best" );
+            e.printStackTrace();
+        }
+
+        return true;
+    }
+
+    public boolean trace_lock( Probe probe ) throws RemoteException {
+        if( this.probes.contains( probe ) )
+            return true; // need to abort
+
+        return this.activeTransaction.probe_lock( probe );
+    }
+
+    /**
+     * Starts up a new server.
+     * @param args	Command line parameters, the first parameter specifies the address of the RMI registry,
+     *				and the second specifies the name of the input file.
+     *				If no parameters are supplied, the default address of "localhost:1111" is used, and
+     *				transactions are performed randomly.
+     */
+    public static void main(String[] args) {
+        String registryAddress = "localhost:1111";
+        String inputfile = null;
+        if(args.length > 0)
+            registryAddress = args[0];
+        if(args.length > 1)
+            inputfile = args[1];
+        try	{
+            new ServerImpl(registryAddress, inputfile);
+        }
+        catch (RemoteException re) {
+            re.printStackTrace();
+        }
+    }
 }
