@@ -149,7 +149,8 @@ public class Transaction
 				lockAcquired(resource);
 			}
 			else {
-				System.err.println("We didn't get the lock we wanted! How can that happen?");
+				System.err.println("We didn't get the lock we wanted! How can that happen? BY #SWAGGING, OF COURSE.");
+                this.abortTransaction = true;
 			}
 		} catch(RemoteException re) {
 			lostContact(resource);

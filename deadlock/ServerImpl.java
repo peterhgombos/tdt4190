@@ -55,6 +55,12 @@ public class ServerImpl extends UnicastRemoteObject implements Server
 	/** The time of startup */
 	private long startupTime;
 
+    private boolean timeout = true;
+
+    public void set_edgechase() {
+        this.timeout = false;
+    }
+
 	/**
 	 * Creates a new server.
 	 * @param ip	The address of the RMI registry to use.
