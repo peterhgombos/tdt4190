@@ -157,6 +157,18 @@ public class Transaction
 		}
 	}
 
+    public boolean probe_lock( Probe probe ) {
+        if( this.waitingForResource == null ) return true;
+
+        try {
+            return this.owner.probe( this.waitingForResource.location.getLockOwner(
+                    this.waitingForResource.resourceId ), probe );
+        } catch( Exception e ) {
+            System.err.println( "To catch them is my real test" );
+        }
+        return false;
+    }
+
 	/**
 	 * Called when the lock of the specified resource has been acquired.
 	 * @param resource	The resource whose lock was acquired.

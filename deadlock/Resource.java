@@ -28,6 +28,19 @@ public class Resource
      * @param transactionId		The ID of the transaction that wants the lock.
      * @return					Whether or not the lock could be acquired.
      */
+    public synchronized boolean lock(int transactionId, boolean timeout ) {
+        if( timeout ) return this.lock(transactionId );
+
+        if(lockOwner == null) {
+            lockOwner = new Integer(transactionId);
+            return false;
+        }
+
+        return true;
+
+        /* chase them edges */
+    }
+
     public synchronized boolean lock(int transactionId) {
         if(lockOwner == null) {
             lockOwner = new Integer(transactionId);

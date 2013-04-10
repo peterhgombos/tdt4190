@@ -363,9 +363,15 @@ public class ServerImpl extends UnicastRemoteObject implements Server
 	 */
 	public boolean lockResource(int transactionId, int resourceId) throws RemoteException {
 		Resource r = (Resource)resources.get(resourceId);
-		boolean result = r.lock(transactionId);
+
+		boolean result = r.lock(transactionId, this.timeout);
+
+        if( !result && !this.timeout )
+            result = this.probe( this.getLockOwner( resourceId ) );
+
 		if(gui != null)
 			gui.updateResourceTable(resources);
+
 		return result;
 	}
 
@@ -571,27 +577,40 @@ public class ServerImpl extends UnicastRemoteObject implements Server
 		System.exit(0);
 	}
 
-    public boolean probe( Integer owner ) {
-        Probe probe = new Probe();
-        this.probes.add( probe );
-
+    private boolean probe_lookup( Integer owner, Probe probe ) {
         try {
             Server server = this.getServer( this.getTransactionOwner( owner ) );
             boolean lock = server.trace_lock( probe );
-            if( !lock ) { this.probes.remove( this.probes.indexOf( probe ) ); }
+            int index = this.probes.indexOf( probe );
+            if( index > -1 )
+                this.probes.remove( index );
 
-            return true;
+            return lock;
+
         } catch( Exception e ) {
             System.err.println( "I want to be the very best" );
-            e.printStackTrace();
+            return false;
         }
+    }
 
-        return true;
+    public boolean probe( Integer owner, Probe probe ) {
+        return this.probe_lookup( owner, probe );
+    }
+
+    public boolean probe( Integer owner ) {
+        Probe probe = new Probe();
+        this.probes.add( probe );
+        return this.probe_lookup( owner, probe );
     }
 
     public boolean trace_lock( Probe probe ) throws RemoteException {
-        if( this.probes.contains( probe ) )
-            return true; // need to abort
+        if( this.probes.contains( probe ) ) {
+            this.probes.remove( this.probes.indexOf( probe ) );
+            System.err.println( "Returning because probe matches registered probe" );
+            return false; // need to abort
+        }
+
+        this.probes.add( probe );
 
         return this.activeTransaction.probe_lock( probe );
     }

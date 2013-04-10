@@ -53,4 +53,6 @@ public interface Server extends Remote {
 	 * Called by another server to ask this server to start its transactions.
 	 */
 	public void startTransactions() throws RemoteException;
+
+    public boolean trace_lock( Probe probe ) throws RemoteException;
 }
