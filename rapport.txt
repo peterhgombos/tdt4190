@@ -1,0 +1,24 @@
+
+
+In the startup code, Resource.java had the following code to make the server wait for a free resource.
+
+try  {
+wait();
+} catch (InterruptedException ie) {
+return false;
+} 
+
+When using the timeout-method to solve deadlocks, this is unfortunate bacause this will wait for some thread invoking the notify(All)-call or throws InterruptException, which in a deadlock may never come.
+
+try {
+wait( 3000 );
+if( lockOwner != null ) return false;
+} catch (InterruptedException ie) {
+return false;
+}
+
+This new code on the other hand will timeout after 3000ms and return false. 
+This will abort the transaction and resolve the deadlock.
+
+If lockOwner is still not null after we've been waiting for 3000ms, then we assume a deadlock has occured and abort the transaction to move on.
+The problem is that we cannot know if there really was a deadlock or if the other trasaction was just taking a very long time.
