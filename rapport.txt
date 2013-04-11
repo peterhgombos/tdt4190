@@ -10,7 +10,7 @@ try  {
 } 
 
 When using the timeout-method to solve deadlocks, this is unfortunate bacause
-this will wait for some thread invoking the notify(All)-call or throws
+this will wait for some entity invoking the notify(All)-call or throws
 InterruptException, which in a deadlock may never come.
 
 try { 
@@ -33,26 +33,25 @@ was just taking a very long time.
 Edge chasing
 
 To bypass the problems of sleeping, we implement edge chasing. This is an
-algorithm that whenever a thread needs a resource somebody else has locked, it sends a
-probe to the other thread, asking if it waits for some other resource to be
-released. Whenever a thread is probed, it will send out the same probe out to
-all the threads it is waiting for. Thus, if a thread is probed with a probe it
-created itself, a deadlock has occured, and the original thread need to abort.
+algorithm that whenever a entity needs a resource somebody else has locked, it sends a
+probe to the other entity, asking if it waits for some other resource to be
+released. Whenever a entity is probed, it will send out the same probe out to
+all the entities it is waiting for. Thus, if a entity is probed with a probe it
+created itself, a deadlock has occured, and the original entity need to abort.
 
 The Probe class is empty, as the only thing a probe needs to do is to be
 uniquely identified, if we declare an object on the stack and pass it around, it
 is as good an identifier as any. The Server implementation now needs another
-method trace_lock. It, and the probe methods and probe_lockup is implemented in
+method trace_lock. It, and the probe methods and probe_lookup is implemented in
 ServerImpl. probe() either takes an owner and a probe, or just an owner. That
 is, if no probe is given it creates a new one, and adds it to the servers list
 of probes.
 
-When a probe is sent, probe_lockup is called on the owner, which then runs
-trace_lock. trace_lock checks if the thread has seen this probe before, and if
-so, it returns false, signaling that the thread needs to abort.
-
-
+When a probe is sent, probe_lookup is called on the owner, which then runs
+trace_lock. trace_lock checks if the entity has seen this probe before, and if
+so, it returns false, signaling that the entity needs to abort.
 
 Our implementation, however, is not working fully. As soon as a deadlock has
-been found, both threads aborts, probably due to some circle dependency. The
-principles are correct, but some bug checking needs to be done.
+been found, both entities aborts, probably due to some circlic dependency. The
+principles are correct, but the implementation itself is buggy. Timeouts,
+however, works splendidly.
